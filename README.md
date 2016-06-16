@@ -1,3 +1,51 @@
+D4A bundle intro
+-----
+
+To create and deploy a bundle on D4A you need the following:
+
+ * docker-compose built of `master`: https://dl.bintray.com/docker-compose/master/
+ * D4A deployment, with SSH tunnel configured: `$ ssh -NL localhost:2375:/var/run/docker.sock root@<SSH-ELB>`
+ * Experimental CLI build:
+    - https://experimental.docker.com/builds/Windows/x86_64/docker-latest.zip
+
+Set `DOCKER_HOST` to point at the tunnel endpoint:
+
+    $Env:DOCKER_HOST="127.0.0.1:2375"
+
+Create the bundle and push containers. The `docker-compose.yml` file in this project store images referenced in the bundle on Docker Hub:
+
+    docker-compose build
+    docker-compose push
+    docker-compose pull db redis
+    docker-compose bundle --fetch-digests
+    ...
+    Wrote bundle to examplevotingapp.dsb
+
+At this point, you can `scp` the bundle to the manager. If you have multiple managers, be sure that it got onto the manager you're using.
+
+    scp -i ~/Downloads/test-key-friis.pem examplevotingapp.dsb root@friism-ELB-SSH-1510648233.us-west-1.elb.amazonaws.com:~/.
+
+Log onto the manager and deploy:
+
+    $ ssh -i ~/Downloads/test-key-friis.pem root@friism-ELB-SSH-1510648233.us-west-1.elb.amazonaws.com
+    Welcome to Docker!
+    ~ # docker deploy examplevotingapp
+    Loading bundle from examplevotingapp.dsb
+    Creating network examplevotingapp_back-tier
+    Creating network examplevotingapp_front-tier
+    Creating service examplevotingapp_result-app
+    Creating service examplevotingapp_voting-app
+    Creating service examplevotingapp_worker
+    Creating service examplevotingapp_db
+    Creating service examplevotingapp_redis
+
+Add labels to the services that you want to expose to the public internet through the ELB:
+
+    docker service update --label docker.swarm.lb=http://:81 votingapp_voting-app
+    docker service update --label docker.swarm.lb=http://:81 votingapp_result-app
+
+The sites are now accesible on the ELB DNS target.
+
 Example Voting App
 ==================
 
