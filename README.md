@@ -17,7 +17,7 @@ Create the bundle and push containers. The `docker-compose.yml` file in this pro
     docker-compose build
     docker-compose push
     docker-compose pull db redis
-    docker-compose bundle --fetch-digests
+    docker-compose bundle
     ...
     Wrote bundle to examplevotingapp.dsb
 
