@@ -41,7 +41,7 @@ Log onto the manager and deploy:
 
 Add labels to the services that you want to expose to the public internet through the ELB:
 
-    docker service update --label docker.swarm.lb=http://:81 votingapp_voting-app
+    docker service update --label docker.swarm.lb=http://:80 votingapp_voting-app
     docker service update --label docker.swarm.lb=http://:81 votingapp_result-app
 
 The sites are now accesible on the ELB DNS target.
